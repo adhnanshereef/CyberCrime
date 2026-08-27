@@ -1,1 +1,54 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+	--font-primary: 'DM Serif Display', Georgia, serif;
+	--color-bg: #fdfcf9;
+	--color-surface: #ffffff;
+	--color-border: #e4e0d8;
+	--color-text-primary: #1f1b16;
+	--color-text-secondary: #5b564c;
+	--color-accent: #b34700;
+	--color-accent-contrast: #ffffff;
+	--color-urgent: #c1121f;
+	--color-success: #2f6b3a;
+	--color-focus-ring: #1f1b16;
+	--color-menu-border: #d76b2b;
+	--color-accent-dark: #963b00;
+}
+
+[data-theme='dark'] {
+	--color-bg: #1a1815;
+	--color-surface: #242220;
+	--color-border: #3a362f;
+	--color-text-primary: #f4f1ea;
+	--color-text-secondary: #b9b3a6;
+	--color-accent: #e08a4f;
+	--color-accent-contrast: #1a1815;
+	--color-urgent: #e5484d;
+	--color-success: #5fa86a;
+	--color-focus-ring: #f4f1ea;
+	--color-menu-border: #f0a06d;
+	--color-accent-dark: #c46d38;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	min-width: 320px;
+	min-height: 100dvh;
+	margin: 0;
+	background: var(--color-bg);
+	font-family: var(--font-primary);
+	font-size: 18px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+button,
+a {
+	-webkit-tap-highlight-color: transparent;
+}
