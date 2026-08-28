@@ -41,7 +41,7 @@ import { RouterLink } from '@angular/router';
           </h1>
           <p class="text-xl md:text-2xl text-text-secondary font-sans leading-relaxed">
             Filing a cybercrime report is now easier than ever. 
-            No more complex forms—simply <strong>record a voice message</strong> in your own language, and our AI assistant will instantly translate and file the official complaint for you.
+            No more complex forms—simply <strong>record a voice message</strong> in your own language, and our AI assistant will instantly translate and file the complaint for you.
           </p>
         </section>
 
