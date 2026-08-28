@@ -10,9 +10,49 @@
 	top: 0;
 	right: 0;
 	left: 0;
-	z-index: 5;
+	z-index: 100;
 	background: var(--color-surface);
 	border-bottom: 1px solid var(--color-border);
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover trigger area when header is hidden */
+.site-header::before {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	height: 20px;
+	background: transparent;
+}
+
+/* Hide header in flow mode on desktop, reveal on hover */
+@media (min-width: 1121px) {
+	.site-header.is-flow {
+		transform: translateY(calc(-100% + 4px)); /* leave a tiny sliver to hover */
+		background: rgba(255, 255, 255, 0.95);
+		border-bottom: 2px solid var(--color-accent);
+	}
+	.site-header.is-flow:hover,
+	.site-header.is-flow:focus-within {
+		transform: translateY(0);
+	}
+}
+
+/* On mobile, flow mode hides brand and leaves only hamburger */
+@media (max-width: 1120px) {
+	.site-header.is-flow .brand {
+		opacity: 0;
+		pointer-events: none;
+	}
+	.site-header.is-flow {
+		border-bottom: none;
+		background: transparent;
+	}
+	.site-header.is-flow:has(.nav-links.is-open) {
+		background: var(--color-surface);
+	}
 }
 
 .navbar {

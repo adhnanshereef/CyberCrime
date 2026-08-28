@@ -14,6 +14,7 @@ export class LanguageService {
   );
 
   readonly navigation = computed(() => this.activeLanguage().navigation);
+  readonly screens = computed(() => this.activeLanguage().screens);
 
   constructor() {
     this.setLanguage(this.selectedCode());

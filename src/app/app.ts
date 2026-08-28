@@ -1,15 +1,30 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ViewEncapsulation } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
+import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { LanguageService } from './core/services/language.service';
 
 @Component({
-  imports: [NgOptimizedImage],
+  imports: [NgOptimizedImage, RouterOutlet, RouterLink],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
+  encapsulation: ViewEncapsulation.None,
 })
 export class App {
   protected readonly languageService = inject(LanguageService);
+  private readonly router = inject(Router);
+  
+  protected readonly isFlowRoute = signal(false);
+  
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      // If we are not on the root path, we are in the flow
+      this.isFlowRoute.set(event.urlAfterRedirects !== '/');
+    });
+  }
   protected readonly isMenuOpen = signal(false);
   protected readonly isComplaintMenuOpen = signal(false);
   protected readonly isLanguageMenuOpen = signal(false);
