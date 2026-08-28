@@ -56,3 +56,7 @@ button,
 a {
 	-webkit-tap-highlight-color: transparent;
 }
+
+#nl-badge-frame {
+	display: none !important;
+}
