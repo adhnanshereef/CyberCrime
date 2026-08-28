@@ -8,4 +8,9 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./screens/login/login').then(m => m.LoginComponent) },
   { path: 'what-happened', loadComponent: () => import('./screens/what-happened/what-happened').then(m => m.WhatHappenedComponent) },
   { path: 'questions', loadComponent: () => import('./screens/dynamic-questions/dynamic-questions').then(m => m.DynamicQuestionsComponent) },
+  { path: 'basic-details', loadComponent: () => import('./screens/basic-details/basic-details').then(m => m.BasicDetailsComponent) },
+  { path: 'verify-id', loadComponent: () => import('./screens/verify-id/verify-id').then(m => m.VerifyIdComponent) },
+  { path: 'review', loadComponent: () => import('./screens/review/review').then(m => m.ReviewComponent) },
+  { path: 'success', loadComponent: () => import('./screens/success/success').then(m => m.SuccessComponent) },
+  { path: 'track', loadComponent: () => import('./screens/track/track').then(m => m.TrackComponent) },
 ];

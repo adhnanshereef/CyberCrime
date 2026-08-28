@@ -9,6 +9,15 @@ export interface ComplaintDraft {
   whatHappenedAudioBase64?: string;
   aiAnalysis?: AIAnalysisResponse;
   answers?: Record<string, string>; // To store answers to dynamic questions
+  rawImages?: Record<string, string>; // To store base64 images keyed by question id
+  basicDetails?: {
+    name: string;
+    address: string;
+    idImageBase64?: string | null;
+    idType?: string | null;
+    idNameMatch?: boolean;
+  };
+  isAnonymous?: boolean;
 }
 
 @Injectable({

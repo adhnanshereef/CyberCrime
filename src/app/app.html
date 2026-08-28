@@ -27,7 +27,7 @@
         }
       </div>
       <div class="secondary-actions">
-        <a class="nav-link" href="#track-complaint" (click)="closeMenus()"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5" /><path d="m15 17 2 2 4-4" /></svg><span>{{ languageService.navigation().track }}</span></a>
+        <a class="nav-link" routerLink="/login" [queryParams]="{returnUrl: '/track'}" (click)="closeMenus()"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5" /><path d="m15 17 2 2 4-4" /></svg><span>{{ languageService.navigation().track }}</span></a>
         <a class="nav-link" href="#contact" (click)="closeMenus()"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 11.5a8 8 0 0 1-8.5 8 8.6 8.6 0 0 1-4-.9L3 20l1.4-4.5A8 8 0 1 1 21 11.5Z" /><path d="M8 12h.01M12 12h.01M16 12h.01" /></svg><span>{{ languageService.navigation().contact }}</span></a>
       </div>
       <div class="language-picker">

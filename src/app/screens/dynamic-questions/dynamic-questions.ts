@@ -361,6 +361,7 @@ export class DynamicQuestionsComponent {
 
     try {
       let finalAnswer = this.currentAnswer();
+      const currentImages = this.stateService.currentDraft()?.rawImages || {};
 
       if (this.selectedImageBase64()) {
         const ocrData = await this.aiService.processScreenshot(this.selectedImageBase64()!);
@@ -375,9 +376,18 @@ export class DynamicQuestionsComponent {
           this.stateService.updateDraft({ aiAnalysis: draft.aiAnalysis } as any);
         }
         finalAnswer = 'Screenshot Provided & Analyzed';
+        
+        // Save the raw image
+        currentImages[q.id] = this.selectedImageBase64()!;
       }
 
       this.answers.update(a => ({ ...a, [q.id]: finalAnswer }));
+      
+      // Persist to state service immediately
+      this.stateService.updateDraft({ 
+        answers: this.answers(),
+        rawImages: currentImages
+      } as any);
       
       this.currentAnswer.set('');
       this.selectedImageBase64.set(null);
@@ -403,7 +413,11 @@ export class DynamicQuestionsComponent {
   }
 
   finish() {
-    console.log('All questions done', this.stateService.currentDraft());
-    // TODO: Route to review screen
+    const draft = this.stateService.currentDraft();
+    if (draft?.isAnonymous) {
+      this.router.navigate(['/review']);
+    } else {
+      this.router.navigate(['/basic-details']);
+    }
   }
 }

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { LanguageService } from '../../core/services/language.service';
+import { ComplaintStateService } from '../../core/services/complaint-state.service';
 
 @Component({
   selector: 'app-complaint-type',
@@ -186,12 +187,14 @@ export class ComplaintTypeComponent {
   protected readonly languageService = inject(LanguageService);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
+  private readonly stateService = inject(ComplaintStateService);
   
   protected selectType(type: 'women' | 'fraud'): void {
     if (type === 'fraud') {
       this.router.navigate(['/urgency']);
     } else if (type === 'women') {
-      this.router.navigate(['/women-children']);
+      this.stateService.updateDraft({ isAnonymous: true, mobileNumber: 'Anonymous' } as any);
+      this.router.navigate(['/what-happened']);
     }
   }
 

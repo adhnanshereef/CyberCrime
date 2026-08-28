@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LanguageService } from '../../core/services/language.service';
@@ -14,15 +14,8 @@ import { ComplaintStateService } from '../../core/services/complaint-state.servi
       
       <div class="content-wrapper">
         <header class="screen-header">
-          <h1>{{ languageService.screens().loginTitle }}</h1>
-          <p class="desc">{{ languageService.screens().loginDesc }}</p>
-          
-          @if (languageService.activeLanguage().code !== 'en') {
-            <div class="english-fallback-group">
-              <span class="fallback-title">Enter your mobile number</span>
-              <span class="fallback-desc">We will send an OTP to verify your number.</span>
-            </div>
-          }
+          <h1>{{ isTracking ? 'Track Your Case' : languageService.screens().loginTitle }}</h1>
+          <p class="desc">{{ isTracking ? 'Login to check case status' : languageService.screens().loginDesc }}</p>
         </header>
         
         <main class="login-card">
@@ -73,7 +66,7 @@ import { ComplaintStateService } from '../../core/services/complaint-state.servi
   `,
   styles: `
     .bg-vibrant-teal {
-      background-color: #00695c; /* teal */
+      background-color: #00695c;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -101,35 +94,9 @@ import { ComplaintStateService } from '../../core/services/complaint-state.servi
       margin: 0 auto;
       width: 100%;
     }
-    .screen-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 0.5rem;
-      font-weight: bold;
-    }
-    .desc {
-      font-size: 1.1rem;
-      color: rgba(255,255,255,0.9);
-    }
-    .english-fallback-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.2);
-    }
-    .fallback-title {
-      font-size: 1rem;
-      color: rgba(255,255,255,0.9);
-    }
-    .fallback-desc {
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.7);
-    }
+    .screen-header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: bold; }
+    .desc { font-size: 1.1rem; color: rgba(255,255,255,0.9); }
 
     .login-card {
       background: white;
@@ -148,105 +115,35 @@ import { ComplaintStateService } from '../../core/services/complaint-state.servi
       background: #f9f9f9;
       transition: border-color 0.2s;
     }
-    .input-group:focus-within {
-      border-color: #00695c;
-    }
-    .country-code {
-      padding: 1rem;
-      font-weight: bold;
-      color: var(--color-text-secondary);
-      background: #eee;
-      border-right: 1px solid var(--color-border);
-    }
-    .mobile-input, .otp-input {
-      flex: 1;
-      padding: 1rem;
-      border: none;
-      font-size: 1.2rem;
-      outline: none;
-      background: transparent;
-      font-family: inherit;
-    }
-    .otp-input {
-      text-align: center;
-      letter-spacing: 0.5rem;
-      font-weight: bold;
-    }
-    .mt-4 {
-      margin-top: 1.5rem;
-    }
-    .primary-btn {
-      width: 100%;
-      padding: 1rem;
-      background: #00695c;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.15rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .primary-btn:hover:not(:disabled) {
-      background: #004d40;
-    }
-    .primary-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .success-banner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      color: #2e7d32;
-      background: #e8f5e9;
-      padding: 0.75rem;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      font-weight: bold;
-    }
+    .input-group:focus-within { border-color: #00695c; }
+    .country-code { padding: 1rem; font-weight: bold; color: var(--color-text-secondary); background: #eee; border-right: 1px solid var(--color-border); }
+    .mobile-input, .otp-input { flex: 1; padding: 1rem; border: none; font-size: 1.2rem; outline: none; background: transparent; font-family: inherit; }
+    .otp-input { text-align: center; letter-spacing: 0.5rem; font-weight: bold; }
+    .mt-4 { margin-top: 1.5rem; }
+    .primary-btn { width: 100%; padding: 1rem; background: #00695c; color: white; border: none; border-radius: 8px; font-size: 1.15rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    .primary-btn:hover:not(:disabled) { background: #004d40; }
+    .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .success-banner { display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: #2e7d32; background: #e8f5e9; padding: 0.75rem; border-radius: 8px; margin-bottom: 1.5rem; font-weight: bold; }
 
-    .bottom-action-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 1.5rem;
-      display: flex;
-      align-items: center;
-      background: linear-gradient(to top, rgba(0, 105, 92, 0.95), transparent);
-      z-index: 10;
-    }
-    .back-btn.standalone {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: white;
-      color: #00695c;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: background 0.2s, transform 0.2s;
-    }
-    .back-btn.standalone:hover {
-      background: #f1f1f1;
-      transform: scale(1.05);
-    }
+    .bottom-action-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 1.5rem; display: flex; align-items: center; background: linear-gradient(to top, rgba(0, 105, 92, 0.95), transparent); z-index: 10; }
+    .back-btn.standalone { width: 56px; height: 56px; border-radius: 50%; background: white; color: #00695c; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: background 0.2s, transform 0.2s; }
+    .back-btn.standalone:hover { background: #f1f1f1; transform: scale(1.05); }
   `
 })
 export class LoginComponent {
   protected readonly languageService = inject(LanguageService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private readonly stateService = inject(ComplaintStateService);
   
   protected readonly step = signal<'mobile' | 'otp'>('mobile');
   protected readonly mobile = signal('');
   protected readonly otp = signal('');
+
+  get isTracking(): boolean {
+    return this.route.snapshot.queryParamMap.get('returnUrl') === '/track';
+  }
 
   protected sendOtp(): void {
     if (this.mobile().length === 10) {
@@ -258,7 +155,9 @@ export class LoginComponent {
     if (this.otp().length >= 4) {
       // Mock verification success
       this.stateService.login(this.mobile());
-      this.router.navigate(['/what-happened']);
+      
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/what-happened';
+      this.router.navigate([returnUrl]);
     }
   }
 

@@ -1,10 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Location } from '@angular/common';
 import { LanguageService } from '../../core/services/language.service';
 
 @Component({
   selector: 'app-language-select',
+  imports: [RouterLink],
   template: `
     <div class="screen-container bg-vibrant-green">
       <div class="wave-bg"></div>
@@ -32,13 +33,14 @@ import { LanguageService } from '../../core/services/language.service';
         </main>
       </div>
 
-      <div class="bottom-action-bar">
+      <div class="bottom-action-bar" style="flex-direction: column; gap: 1rem;">
         <div class="action-pill">
           <button class="back-btn" (click)="goBack()" aria-label="Go back">
             <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
           <button class="next-btn" (click)="goNext()">Next</button>
         </div>
+        <a class="track-link" routerLink="/login" [queryParams]="{returnUrl: '/track'}">Already filed a complaint? Track it here</a>
       </div>
     </div>
   `,
@@ -171,6 +173,13 @@ import { LanguageService } from '../../core/services/language.service';
     }
     .next-btn:hover {
       background: #f1f8e9;
+    }
+    .track-link {
+      color: white;
+      text-decoration: underline;
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.1rem;
     }
   `
 })
