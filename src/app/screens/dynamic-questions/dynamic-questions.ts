@@ -1,289 +1,157 @@
-import { Component, inject, computed, signal } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, signal, computed, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { ComplaintStateService } from '../../core/services/complaint-state.service';
-import { AiService } from '../../core/services/ai.service';
+import { Location } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LanguageService } from '../../core/services/language.service';
+import { ComplaintStateService, ComplaintDraft } from '../../core/services/complaint-state.service';
+import { AiService } from '../../core/services/ai.service';
+import { UiStateService } from '../../core/services/ui-state.service';
 
 @Component({
   selector: 'app-dynamic-questions',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
-    <div class="screen-container bg-vibrant-blue">
-      <div class="wave-bg"></div>
-      
-      <div class="content-wrapper">
-        <header class="screen-header">
-          <h1>Additional Details</h1>
-          <p class="desc">Please help us with a few more details</p>
-        </header>
+    <div class="min-h-screen bg-background text-on-background flex flex-col font-primary">
+      <main class="flex-grow flex flex-col items-center max-w-3xl mx-auto w-full px-6 pt-12 pb-32">
+        
+        @if (currentQuestion()) {
+          <header class="text-center mb-10 w-full animate-fade-in">
+            <h1 class="text-3xl md:text-4xl font-bold text-primary mb-3">
+              {{ currentQuestion()!.question }}
+            </h1>
+          </header>
 
-        <main class="input-card">
-          @if (currentQuestion(); as q) {
-            <h2 class="question-title">{{ q.question }}</h2>
-
-            @if (q.type === 'text') {
-              <input type="text" class="custom-input" [(ngModel)]="currentAnswer" placeholder="Type here...">
+          <div class="w-full bg-surface border-2 border-border rounded-3xl p-6 md:p-8 shadow-sm flex flex-col gap-6 animate-fade-in" style="animation-delay: 0.1s; animation-fill-mode: both;">
+            
+            @if (currentQuestion()!.type === 'text') {
+              <div class="flex flex-col gap-2">
+                <textarea 
+                  [(ngModel)]="currentAnswer" 
+                  rows="4"
+                  placeholder="Type your answer here..."
+                  class="w-full bg-background border-2 border-border rounded-2xl p-6 text-xl font-sans focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors resize-none placeholder-text-secondary/50">
+                </textarea>
+              </div>
             }
 
-            @if (q.type === 'select' && q.options) {
-              <div class="options-container">
-                @for (opt of q.options; track opt) {
+            @if (currentQuestion()!.type === 'select' && currentQuestion()!.options) {
+              <div class="flex flex-col gap-4">
+                @for (option of currentQuestion()!.options; track option) {
                   <button 
-                    class="option-btn" 
-                    [class.active]="currentAnswer() === opt"
-                    (click)="currentAnswer.set(opt)">
-                    {{ opt }}
+                    type="button" 
+                    class="flex items-center justify-between p-6 border-2 rounded-2xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary w-full text-left"
+                    [class.border-primary]="currentAnswer() === option"
+                    [class.bg-primary-container]="currentAnswer() === option"
+                    [class.text-on-primary]="currentAnswer() === option"
+                    [class.border-border]="currentAnswer() !== option"
+                    [class.bg-surface]="currentAnswer() !== option"
+                    [class.hover:border-primary/50]="currentAnswer() !== option"
+                    (click)="currentAnswer.set(option)">
+                    <span class="text-xl font-bold font-sans">{{ option }}</span>
+                    
+                    @if (currentAnswer() === option) {
+                      <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    }
                   </button>
                 }
               </div>
             }
-
-            @if (q.type === 'file_or_text') {
-              <div class="file-text-container">
-                <input type="text" class="custom-input" [(ngModel)]="currentAnswer" placeholder="Type UTR or details...">
-                
-                <div class="divider"><span>OR</span></div>
-                
+            
+            @if (currentQuestion()!.type === 'file_or_text') {
+              <div class="flex flex-col items-center gap-6 w-full">
                 @if (selectedImageBase64()) {
-                  <div class="image-preview">
-                    <img [src]="selectedImageBase64()" alt="Preview" />
-                    <button class="remove-btn" (click)="selectedImageBase64.set(null)">Remove</button>
+                  <div class="w-full border-2 border-border rounded-2xl overflow-hidden shadow-sm relative group">
+                    <img [src]="selectedImageBase64()" class="w-full h-auto object-contain bg-surface-container-low max-h-[400px]" alt="Uploaded file" />
+                    <div class="absolute inset-0 bg-surface/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button class="bg-surface text-urgent border border-urgent/30 px-6 py-3 rounded-xl font-bold font-sans hover:bg-urgent hover:text-white transition-colors" (click)="selectedImageBase64.set(null)">
+                        Remove Image
+                      </button>
+                    </div>
                   </div>
                 } @else {
-                  <label class="upload-btn">
-                    <input type="file" accept="image/*" hidden (change)="onFileSelected($event)">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    Upload Screenshot
-                  </label>
+                  <button 
+                    type="button"
+                    class="w-full border-2 border-dashed border-primary/50 rounded-3xl p-8 flex flex-col items-center gap-4 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    (click)="fileInput.click()">
+                    <div class="w-16 h-16 bg-surface rounded-full flex items-center justify-center text-primary shadow-sm">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <span class="text-lg font-bold text-primary">Tap to select photo (Optional)</span>
+                  </button>
+                  
+                  <div class="flex items-center gap-4 w-full text-text-secondary">
+                    <div class="flex-1 h-px bg-border"></div>
+                    <span class="font-bold text-sm uppercase">Or type details</span>
+                    <div class="flex-1 h-px bg-border"></div>
+                  </div>
+
+                  <textarea 
+                    [(ngModel)]="currentAnswer" 
+                    rows="2"
+                    placeholder="Type details if you don't have a screenshot..."
+                    class="w-full bg-background border-2 border-border rounded-2xl p-4 text-lg font-sans focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors resize-none placeholder-text-secondary/50">
+                  </textarea>
                 }
+                
+                <input 
+                  #fileInput 
+                  type="file" 
+                  accept="image/*" 
+                  capture="environment"
+                  class="hidden" 
+                  (change)="onFileSelected($event)" />
+
+                <canvas #imageCanvas style="display: none;"></canvas>
               </div>
             }
-          } @else {
-            <div class="all-done">
-              <h2>All questions answered!</h2>
-              <p>We have all the details we need for now.</p>
-            </div>
-          }
-        </main>
-      </div>
 
-      <div class="bottom-action-bar">
-        <div class="action-pill">
-          <button class="back-btn" (click)="goBack()">
+          </div>
+        }
+      </main>
+
+      <div class="fixed bottom-0 left-0 right-0 p-6 flex flex-col items-center gap-4 bg-gradient-to-t from-background via-background/95 to-transparent z-10 pointer-events-none">
+        <div class="flex bg-surface rounded-full overflow-hidden w-full max-w-sm shadow-xl border border-border pointer-events-auto">
+          <button class="flex items-center justify-center px-6 py-4 bg-transparent text-primary hover:bg-surface-container-low transition-colors border-r border-border" (click)="goBack()" aria-label="Go back">
             <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
-          
-          @if (currentQuestion()) {
-            <button class="next-btn" (click)="nextQuestion()" [disabled]="!canProceed()">
-              @if (isProcessing()) { Processing... } @else { Next }
-            </button>
-          } @else {
-            <button class="next-btn" (click)="finish()">Review Details</button>
-          }
+          <button class="flex-1 bg-transparent text-primary font-bold text-xl hover:bg-surface-container-low transition-colors disabled:opacity-50 disabled:cursor-not-allowed" (click)="nextQuestion()" [disabled]="!canProceed()">
+            Next
+          </button>
         </div>
       </div>
     </div>
   `,
   styles: `
-    .bg-vibrant-blue {
-      background-color: #0d47a1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      color: white;
+    .animate-fade-in {
+      animation: fadeIn 0.4s ease-out;
     }
-    .wave-bg {
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 50%;
-      background-color: #1976d2; 
-      border-bottom-left-radius: 50% 20%;
-      border-bottom-right-radius: 50% 20%;
-      z-index: 0;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .content-wrapper {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      padding: calc(88px + 2rem) 1rem 7rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      max-width: 600px;
-      margin: 0 auto;
-      width: 100%;
-    }
-    .screen-header { text-align: center; margin-bottom: 2rem; }
-    h1 { font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: bold; }
-    .desc { font-size: 1.1rem; color: rgba(255,255,255,0.9); }
-    
-    .input-card {
-      background: white;
-      border-radius: 20px;
-      padding: 2rem;
-      width: 100%;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-      color: var(--color-text-primary);
-    }
-    .question-title {
-      font-size: 1.4rem;
-      margin-bottom: 1.5rem;
-      color: #0d47a1;
-      line-height: 1.3;
-    }
-    
-    .custom-input {
-      width: 100%;
-      padding: 1rem;
-      border: 2px solid var(--color-border);
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-family: inherit;
-    }
-    .custom-input:focus {
-      border-color: #1976d2;
-      outline: none;
-    }
-
-    .options-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .option-btn {
-      padding: 1.25rem;
-      background: #f5f5f5;
-      border: 2px solid transparent;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      text-align: left;
-    }
-    .option-btn.active {
-      background: #e3f2fd;
-      border-color: #1976d2;
-      color: #0d47a1;
-    }
-
-    .file-text-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .divider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      color: #888;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      border-bottom: 1px solid #ddd;
-    }
-    .divider span { padding: 0 10px; font-weight: bold; font-size: 0.9rem; }
-    
-    .upload-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 1.25rem;
-      background: #1976d2;
-      color: white;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
-    .image-preview {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .image-preview img {
-      width: 100%;
-      max-height: 250px;
-      object-fit: cover;
-      border-radius: 12px;
-      border: 2px solid #ddd;
-    }
-    .remove-btn {
-      padding: 0.75rem;
-      background: #ffebee;
-      color: #d32f2f;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .all-done {
-      text-align: center;
-      padding: 2rem 0;
-      color: #2e7d32;
-    }
-
-    .bottom-action-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      padding: 1.5rem;
-      display: flex;
-      justify-content: center;
-      background: linear-gradient(to top, rgba(13, 71, 161, 0.95), transparent);
-      z-index: 10;
-    }
-    .action-pill {
-      display: flex;
-      background: white;
-      border-radius: 50px;
-      overflow: hidden;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    }
-    .back-btn {
-      padding: 1rem 1.5rem;
-      background: transparent;
-      color: #0d47a1;
-      border: none;
-      border-right: 2px solid rgba(13, 71, 161, 0.35);
-      cursor: pointer;
-    }
-    .next-btn {
-      flex: 1;
-      background: transparent;
-      color: #0d47a1;
-      border: none;
-      font-weight: bold;
-      font-size: 1.15rem;
-      cursor: pointer;
-    }
-    .next-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   `
 })
 export class DynamicQuestionsComponent {
-  private readonly stateService = inject(ComplaintStateService);
-  private readonly aiService = inject(AiService);
-  private readonly location = inject(Location);
+  protected readonly languageService = inject(LanguageService);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly stateService = inject(ComplaintStateService);
+  private readonly uiState = inject(UiStateService);
+  private readonly aiService = inject(AiService);
 
-  private readonly questions = computed(() => {
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('imageCanvas') imageCanvas?: ElementRef<HTMLCanvasElement>;
+
+  protected activeIndex = signal(0);
+  protected currentAnswer = signal<string>('');
+  protected selectedImageBase64 = signal<string | null>(null);
+
+  protected questions = computed(() => {
     const draft = this.stateService.currentDraft();
     return draft?.aiAnalysis?.follow_up_questions || [];
   });
 
-  public readonly answers = signal<Record<string, string>>({});
-  
-  public readonly activeIndex = signal(0);
-  public readonly currentAnswer = signal('');
-  public readonly selectedImageBase64 = signal<string | null>(null);
-  public readonly isProcessing = signal(false);
+  protected answers = signal<Record<string, string>>(this.stateService.currentDraft()?.answers || {});
 
   public readonly currentQuestion = computed(() => {
     const qs = this.questions();
@@ -305,79 +173,100 @@ export class DynamicQuestionsComponent {
     return q;
   });
 
-  canProceed(): boolean {
-    if (this.isProcessing()) return false;
+  constructor() {
+    if (this.questions().length === 0) {
+      this.finish();
+    }
+  }
+
+  protected canProceed(): boolean {
     const ans = this.currentAnswer()?.trim();
     const img = this.selectedImageBase64();
     return !!ans || !!img;
   }
 
-  async onFileSelected(event: any) {
-    const file = event.target.files[0];
+  async onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    // Compress image to avoid Supabase Edge Function memory limits
-    const bitmap = await createImageBitmap(file);
-    const MAX_DIMENSION = 1024;
-    
-    let width = bitmap.width;
-    let height = bitmap.height;
-    
-    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-      if (width > height) {
-        height = Math.round((height * MAX_DIMENSION) / width);
-        width = MAX_DIMENSION;
-      } else {
-        width = Math.round((width * MAX_DIMENSION) / height);
-        height = MAX_DIMENSION;
-      }
-    }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.drawImage(bitmap, 0, 0, width, height);
-      // Export as compressed JPEG to save memory
-      const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-      this.selectedImageBase64.set(compressedBase64);
-    } else {
-      // Fallback if canvas fails
-      const reader = new FileReader();
-      reader.onload = () => this.selectedImageBase64.set(reader.result as string);
-      reader.readAsDataURL(file);
+    this.uiState.showProcessing('Compressing image...');
+    try {
+      const base64 = await this.compressImage(file);
+      this.selectedImageBase64.set(base64);
+    } catch (err) {
+      console.error('Image upload failed', err);
+      alert('Failed to process image. Please try again.');
+    } finally {
+      this.uiState.hideProcessing();
     }
   }
 
-  async nextQuestion() {
+  private compressImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          if (!this.imageCanvas) return reject('No canvas');
+          const canvas = this.imageCanvas.nativeElement;
+          const ctx = canvas.getContext('2d');
+          
+          let width = img.width;
+          let height = img.height;
+          const MAX_SIZE = 1024;
+          
+          if (width > height && width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          } else if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  protected async nextQuestion() {
     if (!this.canProceed()) return;
     
     const q = this.currentQuestion();
     if (!q) return;
 
-    this.isProcessing.set(true);
+    this.uiState.showProcessing('Processing response...');
 
     try {
       let finalAnswer = this.currentAnswer();
-      const currentImages = this.stateService.currentDraft()?.rawImages || {};
+      const draft: ComplaintDraft = this.stateService.currentDraft() || {} as ComplaintDraft;
+      const currentImages = draft.rawImages || {};
 
       if (this.selectedImageBase64()) {
+        this.uiState.showProcessing('Analyzing screenshot...');
         const ocrData = await this.aiService.processScreenshot(this.selectedImageBase64()!);
         
         // Merge OCR data into our extracted_details
-        const draft = this.stateService.currentDraft();
-        if (draft && draft.aiAnalysis) {
+        if (draft.aiAnalysis) {
           draft.aiAnalysis.extracted_details = {
-            ...draft.aiAnalysis.extracted_details,
-            ...ocrData
+            ...(draft.aiAnalysis.extracted_details || {}),
+            ...ocrData,
+            // Fallback for fields not explicitly matching but extracted
+            category: draft.aiAnalysis.extracted_details.category
           };
           this.stateService.updateDraft({ aiAnalysis: draft.aiAnalysis } as any);
         }
-        finalAnswer = 'Screenshot Provided & Analyzed';
+        finalAnswer = finalAnswer ? `Screenshot Provided & Analyzed. Details: ${finalAnswer}` : 'Screenshot Provided & Analyzed';
         
-        // Save the raw image
+        // Save the raw image mapped to this question ID
         currentImages[q.id] = this.selectedImageBase64()!;
       }
 
@@ -392,15 +281,19 @@ export class DynamicQuestionsComponent {
       this.currentAnswer.set('');
       this.selectedImageBase64.set(null);
       this.activeIndex.update(i => i + 1);
+
+      if (this.activeIndex() >= this.questions().length) {
+        this.finish();
+      }
     } catch (err) {
       console.error(err);
-      alert('Failed to process image. Please try again.');
+      alert('Failed to process. Please try again.');
     } finally {
-      this.isProcessing.set(false);
+      this.uiState.hideProcessing();
     }
   }
 
-  goBack() {
+  protected goBack(): void {
     if (this.activeIndex() > 0) {
       this.activeIndex.update(i => i - 1);
       const q = this.currentQuestion();
@@ -412,7 +305,7 @@ export class DynamicQuestionsComponent {
     }
   }
 
-  finish() {
+  private finish() {
     const draft = this.stateService.currentDraft();
     if (draft?.isAnonymous) {
       this.router.navigate(['/review']);

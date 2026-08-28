@@ -376,19 +376,6 @@
 	font-size: 18px;
 }
 
-h1 {
-	max-width: 670px;
-	margin: 0;
-	font-size: clamp(42px, 6vw, 76px);
-	font-weight: 400;
-	line-height: 1.08;
-}
-
-h1 em {
-	color: var(--color-accent);
-	font-style: normal;
-}
-
 .hero-copy {
 	max-width: 570px;
 	margin: 28px 0 0;
@@ -904,10 +891,6 @@ h1 em {
 
 	.home-page {
 		padding-top: 130px;
-	}
-
-	h1 {
-		font-size: 44px;
 	}
 
 	.hero-copy {

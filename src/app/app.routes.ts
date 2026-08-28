@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/language', pathMatch: 'full' },
+  { path: '', loadComponent: () => import('./screens/home/home').then(m => m.HomeComponent) },
   { path: 'language', loadComponent: () => import('./screens/language-select/language-select').then(m => m.LanguageSelectComponent) },
   { path: 'complaint-type', loadComponent: () => import('./screens/complaint-type/complaint-type').then(m => m.ComplaintTypeComponent) },
   { path: 'urgency', loadComponent: () => import('./screens/urgency/urgency').then(m => m.UrgencyComponent) },
@@ -13,4 +13,5 @@ export const routes: Routes = [
   { path: 'review', loadComponent: () => import('./screens/review/review').then(m => m.ReviewComponent) },
   { path: 'success', loadComponent: () => import('./screens/success/success').then(m => m.SuccessComponent) },
   { path: 'track', loadComponent: () => import('./screens/track/track').then(m => m.TrackComponent) },
+  { path: 'contact', loadComponent: () => import('./screens/contact/contact').then(m => m.ContactComponent) },
 ];

@@ -5,42 +5,54 @@ import { FormsModule } from '@angular/forms';
 import { LanguageService } from '../../core/services/language.service';
 import { ComplaintStateService } from '../../core/services/complaint-state.service';
 import { AiService } from '../../core/services/ai.service';
+import { UiStateService } from '../../core/services/ui-state.service';
 
 @Component({
   selector: 'app-what-happened',
   imports: [FormsModule],
   template: `
-    <div class="screen-container bg-vibrant-blue">
-      <div class="wave-bg"></div>
-      
-      <div class="content-wrapper">
-        <header class="screen-header">
-          <h1>{{ languageService.screens().whatHappenedTitle }}</h1>
-          <p class="desc">{{ languageService.screens().whatHappenedDesc }}</p>
-          
+    <div class="min-h-screen bg-background text-on-background flex flex-col font-primary">
+      <main class="flex-grow flex flex-col items-center max-w-3xl mx-auto w-full px-6 pt-12 pb-32">
+        
+        <header class="text-center mb-10 w-full">
+          <h1 class="text-4xl md:text-5xl font-bold text-primary mb-3">
+            {{ languageService.screens().whatHappenedTitle }}
+          </h1>
+          <p class="text-xl text-text-secondary font-sans mb-4">
+            {{ languageService.screens().whatHappenedDesc }}
+          </p>
           @if (languageService.activeLanguage().code !== 'en') {
-            <div class="english-fallback-group">
-              <span class="fallback-title">Tell us what happened</span>
-              <span class="fallback-desc">How would you like to explain?</span>
+            <div class="w-full max-w-sm mx-auto pt-4 border-t border-border">
+              <span class="block text-sm font-bold text-text-primary">Tell us what happened</span>
+              <span class="block text-xs text-text-secondary font-sans">How would you like to explain?</span>
             </div>
           }
         </header>
         
-        <main class="input-card">
+        <div class="w-full bg-surface border-2 border-border rounded-3xl p-6 md:p-8 shadow-sm flex flex-col gap-8">
+          
           <!-- Mode Selector -->
-          <div class="mode-selector">
+          <div class="flex flex-col sm:flex-row gap-4 bg-surface-container-low p-2 rounded-2xl">
             <button 
               type="button" 
-              class="mode-btn" 
-              [class.active]="inputType() === 'text'"
+              class="flex-1 flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-lg transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              [class.bg-surface]="inputType() === 'text'"
+              [class.shadow-md]="inputType() === 'text'"
+              [class.text-primary]="inputType() === 'text'"
+              [class.text-text-secondary]="inputType() !== 'text'"
+              [class.hover:bg-surface/50]="inputType() !== 'text'"
               (click)="setInputType('text')">
               <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               {{ languageService.screens().typeText }}
             </button>
             <button 
               type="button" 
-              class="mode-btn" 
-              [class.active]="inputType() === 'voice'"
+              class="flex-1 flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-lg transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              [class.bg-surface]="inputType() === 'voice'"
+              [class.shadow-md]="inputType() === 'voice'"
+              [class.text-primary]="inputType() === 'voice'"
+              [class.text-text-secondary]="inputType() !== 'voice'"
+              [class.hover:bg-surface/50]="inputType() !== 'voice'"
               (click)="setInputType('voice')">
               <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
               {{ languageService.screens().recordVoice }}
@@ -49,36 +61,39 @@ import { AiService } from '../../core/services/ai.service';
 
           <!-- Text Mode -->
           @if (inputType() === 'text') {
-            <div class="text-input-container">
+            <div class="flex flex-col gap-2 animate-fade-in">
               <textarea 
                 [(ngModel)]="textContent" 
                 [placeholder]="languageService.screens().textPlaceholder"
                 rows="6"
-                class="what-happened-textarea">
+                class="w-full bg-background border-2 border-border rounded-2xl p-6 text-xl font-sans focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors resize-none placeholder-text-secondary/50">
               </textarea>
             </div>
           }
 
           <!-- Voice Mode -->
           @if (inputType() === 'voice') {
-            <div class="voice-input-container">
+            <div class="flex flex-col items-center gap-8 py-6 animate-fade-in">
               @if (permissionError()) {
-                <div class="permission-error">
-                  <svg aria-hidden="true" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <p>{{ permissionError() }}</p>
-                  <button class="retry-btn" (click)="requestMicPermission()">Try Again</button>
+                <div class="flex flex-col items-center text-center p-6 bg-red-50 text-urgent border border-urgent/20 rounded-2xl gap-4 w-full">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <p class="font-sans font-bold">{{ permissionError() }}</p>
+                  <button class="bg-urgent text-white px-6 py-2 rounded-xl font-bold hover:bg-urgent/90 transition-colors shadow-sm" (click)="requestMicPermission()">Try Again</button>
                 </div>
               } @else {
                 
                 @if (audioUrl()) {
                   <!-- Custom Playback UI -->
-                  <div class="playback-container">
-                    <p class="success-text">Recording Saved!</p>
+                  <div class="w-full flex flex-col items-center gap-6">
+                    <div class="inline-flex items-center gap-2 bg-success/10 text-success px-4 py-2 rounded-full font-bold">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                      Recording Saved!
+                    </div>
                     
                     <audio #audioPlayer [src]="audioUrl()" (ended)="handleAudioEnd()" (pause)="isPlaying.set(false)" (play)="isPlaying.set(true)" hidden></audio>
                     
-                    <div class="custom-audio-player">
-                      <button class="play-pause-btn" (click)="togglePlay()">
+                    <div class="w-full flex items-center gap-4 bg-surface-container-low p-3 md:p-4 rounded-full border border-border shadow-inner">
+                      <button class="w-14 h-14 shrink-0 rounded-full bg-primary text-white flex items-center justify-center hover:scale-105 transition-transform shadow-md outline-none focus-visible:ring-4 focus-visible:ring-primary/50" (click)="togglePlay()">
                         @if (isPlaying()) {
                           <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
                         } @else {
@@ -86,362 +101,89 @@ import { AiService } from '../../core/services/ai.service';
                         }
                       </button>
                       
-                      <div class="bars">
+                      <div class="flex-1 flex items-center justify-center gap-1 h-12 overflow-hidden">
                         @for (level of audioLevels(); track $index) {
-                          <div class="bar playback-bar" [style.height.%]="level"></div>
+                          <div class="w-1.5 md:w-2 rounded-full bg-primary transition-all duration-75" [style.height.%]="level"></div>
                         }
                       </div>
 
-                      <button class="delete-btn" (click)="resetRecording()" aria-label="Delete recording">
+                      <button class="w-12 h-12 shrink-0 rounded-full bg-surface text-urgent border border-urgent/30 flex items-center justify-center hover:bg-urgent/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-urgent" (click)="resetRecording()" aria-label="Delete recording">
                         <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                       </button>
                     </div>
                   </div>
                 } @else {
                   <!-- Recording UI -->
-                  <div class="visualizer-container">
-                    <div class="bars">
-                      @for (level of audioLevels(); track $index) {
-                        <div class="bar record-bar" [style.height.%]="level"></div>
-                      }
+                  <div class="w-full flex flex-col items-center justify-center gap-10">
+                    <div class="h-24 w-full flex flex-col justify-end items-center gap-4">
+                      <div class="flex-1 flex items-end justify-center gap-1.5 w-full">
+                        @for (level of audioLevels(); track $index) {
+                          <div class="w-2 rounded-full transition-all duration-75 min-h-[4px]" 
+                               [class.bg-urgent]="isRecording()" 
+                               [class.bg-primary]="!isRecording()" 
+                               [style.height.%]="level">
+                          </div>
+                        }
+                      </div>
+                      <p class="font-bold font-sans transition-colors duration-300" 
+                         [class.text-urgent]="isRecording()" 
+                         [class.animate-pulse]="isRecording()"
+                         [class.text-text-secondary]="!isRecording()">
+                        {{ isRecording() ? languageService.screens().recording : languageService.screens().holdToTalk }}
+                      </p>
                     </div>
-                    <p class="recording-status" [class.is-recording]="isRecording()">
-                      {{ isRecording() ? languageService.screens().recording : languageService.screens().holdToTalk }}
-                    </p>
-                  </div>
 
-                  <button 
-                    class="record-btn" 
-                    [class.recording]="isRecording()"
-                    (pointerdown)="startRecording($event)"
-                    (pointerup)="stopRecording()"
-                    (pointercancel)="stopRecording()"
-                    (pointerleave)="stopRecording()"
-                    (contextmenu)="preventContextMenu($event)">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
-                  </button>
+                    <button 
+                      class="relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer select-none transition-all duration-300 outline-none focus-visible:ring-4 focus-visible:ring-primary/50"
+                      [class.bg-surface-container-highest]="!isRecording()"
+                      [class.text-primary]="!isRecording()"
+                      [class.bg-urgent]="isRecording()"
+                      [class.text-white]="isRecording()"
+                      [class.scale-110]="isRecording()"
+                      [class.shadow-2xl]="isRecording()"
+                      [class.shadow-urgent]="isRecording()"
+                      (pointerdown)="startRecording($event)"
+                      (pointerup)="stopRecording()"
+                      (pointercancel)="stopRecording()"
+                      (pointerleave)="stopRecording()"
+                      (contextmenu)="preventContextMenu($event)">
+                      
+                      <!-- Ripple rings when recording -->
+                      @if (isRecording()) {
+                        <div class="absolute inset-0 rounded-full border-4 border-urgent animate-ping opacity-50"></div>
+                        <div class="absolute inset-[-10px] rounded-full border-2 border-urgent animate-ping opacity-25" style="animation-delay: 0.2s"></div>
+                      }
+                      
+                      <svg aria-hidden="true" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" class="relative z-10"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+                    </button>
+                  </div>
                 }
               }
             </div>
           }
-        </main>
-      </div>
+        </div>
+      </main>
 
-      <div class="bottom-action-bar">
-        <div class="action-pill">
-          <button class="back-btn" (click)="goBack()" aria-label="Go back">
+      <div class="fixed bottom-0 left-0 right-0 p-6 flex flex-col items-center gap-4 bg-gradient-to-t from-background via-background/95 to-transparent z-10 pointer-events-none">
+        <div class="flex bg-surface rounded-full overflow-hidden w-full max-w-sm shadow-xl border border-border pointer-events-auto">
+          <button class="flex items-center justify-center px-6 py-4 bg-transparent text-primary hover:bg-surface-container-low transition-colors border-r border-border" (click)="goBack()" aria-label="Go back">
             <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
-          <button class="next-btn" (click)="goNext()" [disabled]="!canProceed()">
-            @if (isLoading()) { Processing... } @else { Next }
+          <button class="flex-1 bg-transparent text-primary font-bold text-xl hover:bg-surface-container-low transition-colors disabled:opacity-50 disabled:cursor-not-allowed" (click)="goNext()" [disabled]="!canProceed()">
+            Next
           </button>
         </div>
       </div>
     </div>
   `,
   styles: `
-    .bg-vibrant-blue {
-      background-color: #0d47a1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      color: white;
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out;
     }
-    .wave-bg {
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 50%;
-      background-color: #1976d2; 
-      border-bottom-left-radius: 50% 20%;
-      border-bottom-right-radius: 50% 20%;
-      z-index: 0;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .content-wrapper {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      padding: calc(88px + 2rem) 1rem 7rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      max-width: 600px;
-      margin: 0 auto;
-      width: 100%;
-    }
-    .screen-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 0.5rem;
-      font-weight: bold;
-    }
-    .desc {
-      font-size: 1.1rem;
-      color: rgba(255,255,255,0.9);
-    }
-    .english-fallback-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.2);
-    }
-    .fallback-title {
-      font-size: 1rem;
-      color: rgba(255,255,255,0.9);
-    }
-    .fallback-desc {
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.7);
-    }
-
-    /* Solid Color Input Card */
-    .input-card {
-      background: white;
-      border-radius: 20px;
-      padding: 1.5rem;
-      width: 100%;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      color: var(--color-text-primary);
-    }
-    .mode-selector {
-      display: flex;
-      gap: 1rem;
-    }
-    .mode-btn {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 1rem;
-      background: #f5f5f5;
-      border: 2px solid transparent;
-      border-radius: 12px;
-      color: var(--color-text-secondary);
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .mode-btn.active {
-      background: #e3f2fd;
-      border-color: #1976d2;
-      color: #0d47a1;
-      box-shadow: 0 4px 12px rgba(13, 71, 161, 0.1);
-    }
-
-    .what-happened-textarea {
-      width: 100%;
-      padding: 1rem;
-      background: #f9f9f9;
-      color: var(--color-text-primary);
-      border: 2px solid var(--color-border);
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 1.1rem;
-      resize: vertical;
-      outline: none;
-    }
-    .what-happened-textarea::placeholder {
-      color: var(--color-text-secondary);
-    }
-    .what-happened-textarea:focus {
-      border-color: #1976d2;
-      background: white;
-    }
-
-    .voice-input-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-      padding: 1rem 0;
-    }
-    .permission-error {
-      text-align: center;
-      color: #d32f2f;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      background: #ffebee;
-      padding: 1.5rem;
-      border-radius: 12px;
-    }
-    .retry-btn {
-      padding: 0.75rem 1.5rem;
-      background: #d32f2f;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .visualizer-container {
-      height: 80px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 1rem;
-    }
-    .bars {
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-      height: 40px;
-      flex: 1;
-      justify-content: center;
-    }
-    .bar {
-      width: 6px;
-      border-radius: 3px;
-      transition: height 0.05s ease;
-      min-height: 4px;
-    }
-    .record-bar {
-      background-color: #1976d2;
-    }
-    .playback-bar {
-      background-color: #0d47a1;
-    }
-    .recording-status {
-      font-weight: bold;
-      color: var(--color-text-secondary);
-    }
-    .recording-status.is-recording {
-      color: #d32f2f;
-      animation: pulse 1s infinite alternate;
-    }
-    @keyframes pulse {
-      from { opacity: 1; }
-      to { opacity: 0.5; }
-    }
-
-    .record-btn {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: #f5f5f5;
-      color: #1976d2;
-      border: 4px solid #1976d2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: none; /* Prevent scroll only while long pressing the button */
-      transition: all 0.2s;
-    }
-    .record-btn.recording {
-      background: #d32f2f;
-      border-color: #b71c1c;
-      color: white;
-      transform: scale(1.1);
-      box-shadow: 0 0 20px rgba(211, 47, 47, 0.5);
-    }
-    
-    .playback-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      width: 100%;
-    }
-    .success-text {
-      color: #2e7d32;
-      font-weight: bold;
-    }
-    .custom-audio-player {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      background: #f5f5f5;
-      padding: 0.75rem;
-      border-radius: 50px;
-      width: 100%;
-    }
-    .play-pause-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #1976d2;
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .delete-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #ffebee;
-      color: #d32f2f;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .bottom-action-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 1.5rem;
-      display: flex;
-      justify-content: center;
-      background: linear-gradient(to top, rgba(13, 71, 161, 0.95), transparent);
-      z-index: 10;
-    }
-    .action-pill {
-      display: flex;
-      background: white;
-      border-radius: 50px;
-      overflow: hidden;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    }
-    .back-btn {
-      padding: 1rem 1.5rem;
-      background: transparent;
-      color: #0d47a1;
-      border: none;
-      border-right: 2px solid rgba(13, 71, 161, 0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .back-btn:hover { background: #e3f2fd; }
-    .next-btn {
-      flex: 1;
-      background: transparent;
-      color: #0d47a1;
-      border: none;
-      font-weight: bold;
-      font-size: 1.15rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .next-btn:hover:not(:disabled) { background: #e3f2fd; }
-    .next-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   `
 })
 export class WhatHappenedComponent implements OnDestroy {
@@ -449,6 +191,8 @@ export class WhatHappenedComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly stateService = inject(ComplaintStateService);
+  private readonly uiState = inject(UiStateService);
+  private readonly aiService = inject(AiService);
 
   protected readonly inputType = signal<'text' | 'voice' | null>(null);
   
@@ -476,8 +220,6 @@ export class WhatHappenedComponent implements OnDestroy {
   private micSource: MediaStreamAudioSourceNode | null = null;
   private muteNode: GainNode | null = null;
   private recordTimeout: any;
-  protected readonly isLoading = signal(false);
-  private readonly aiService = inject(AiService);
 
   constructor() {
     const draft = this.stateService.currentDraft();
@@ -502,7 +244,6 @@ export class WhatHappenedComponent implements OnDestroy {
   }
 
   protected canProceed(): boolean {
-    if (this.isLoading()) return false;
     if (this.inputType() === 'text') {
       return this.textContent().trim().length > 0;
     } else if (this.inputType() === 'voice') {
@@ -515,10 +256,39 @@ export class WhatHappenedComponent implements OnDestroy {
     event.preventDefault(); 
   }
 
+  // --- Sound Effects ---
+  private playSoundEffect(type: 'start' | 'stop') {
+    if (!this.audioContext) return;
+    try {
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+      
+      osc.connect(gain);
+      gain.connect(this.audioContext.destination);
+      
+      if (type === 'start') {
+        osc.frequency.setValueAtTime(440, this.audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, this.audioContext.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+        osc.start();
+        osc.stop(this.audioContext.currentTime + 0.1);
+      } else {
+        osc.frequency.setValueAtTime(880, this.audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, this.audioContext.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.15);
+        osc.start();
+        osc.stop(this.audioContext.currentTime + 0.15);
+      }
+    } catch (e) {
+      console.warn('Could not play sound effect', e);
+    }
+  }
+
   protected async requestMicPermission() {
     this.permissionError.set(null);
     
-    // Check for Secure Context which is strictly required for getUserMedia
     if (!window.isSecureContext) {
       this.permissionError.set('Microphone access requires a secure connection (HTTPS or localhost). You are currently using HTTP.');
       return;
@@ -540,8 +310,14 @@ export class WhatHappenedComponent implements OnDestroy {
 
     if (!this.stream || this.isRecording()) return;
 
-    this.isRecording.set(true); // SET FLAG FIRST so visualizer doesn't instantly die
+    this.isRecording.set(true); 
     this.setupVisualizer(this.stream);
+    
+    if (this.audioContext?.state === 'suspended') {
+      this.audioContext.resume().then(() => this.playSoundEffect('start'));
+    } else {
+      this.playSoundEffect('start');
+    }
 
     try {
       this.mediaRecorder = new MediaRecorder(this.stream);
@@ -559,7 +335,6 @@ export class WhatHappenedComponent implements OnDestroy {
 
       this.mediaRecorder.start();
 
-      // Enforce 29s limit to avoid exceeding Sarvam limits
       this.recordTimeout = setTimeout(() => {
         if (this.isRecording()) {
           this.stopRecording();
@@ -574,6 +349,7 @@ export class WhatHappenedComponent implements OnDestroy {
 
   protected stopRecording() {
     if (this.mediaRecorder && this.isRecording()) {
+      this.playSoundEffect('stop');
       this.mediaRecorder.stop();
       this.isRecording.set(false);
       this.stopVisualizer();
@@ -590,12 +366,10 @@ export class WhatHappenedComponent implements OnDestroy {
     this.audioLevels.set(Array(20).fill(10));
     this.isPlaying.set(false);
 
-    // Explicitly remove it from the saved draft so it doesn't come back on refresh
     this.stateService.updateDraft({ 
       whatHappenedAudioBase64: undefined 
     });
     
-    // Attempt to get mic stream ready again
     if (!this.stream && !this.permissionError()) {
       this.requestMicPermission();
     }
@@ -605,7 +379,7 @@ export class WhatHappenedComponent implements OnDestroy {
     if (!this.audioElRef) return;
     const el = this.audioElRef.nativeElement;
     if (el.paused) {
-      this.isPlaying.set(true); // SET FLAG FIRST
+      this.isPlaying.set(true);
       this.setupPlaybackVisualizer(el);
       el.play();
     } else {
@@ -626,13 +400,9 @@ export class WhatHappenedComponent implements OnDestroy {
       this.audioContext.resume();
     }
     
-    // 1. Keep reference on class so it doesn't get garbage collected!
     this.micSource = this.audioContext.createMediaStreamSource(source);
     this.analyser = this.audioContext.createAnalyser();
     
-    // 2. Some browsers optimize away nodes that don't connect to a destination.
-    // We connect a GainNode to the destination with 0 volume (mute) to force audio processing
-    // without causing a speaker feedback loop!
     this.muteNode = this.audioContext.createGain();
     this.muteNode.gain.value = 0;
     
@@ -663,7 +433,6 @@ export class WhatHappenedComponent implements OnDestroy {
       this.audioContext.resume();
     }
 
-    // Wrap in try-catch in case of multiple connections causing InvalidStateError
     try {
       this.playbackSource = this.audioContext.createMediaElementSource(el);
       this.analyser = this.audioContext.createAnalyser();
@@ -684,10 +453,9 @@ export class WhatHappenedComponent implements OnDestroy {
     this.dataArray = new Uint8Array(bufferLength);
     
     const draw = () => {
-      // Must check both flags to see if we should stop
       if (!this.isRecording() && !this.isPlaying()) {
         this.audioLevels.set(Array(20).fill(10));
-        return; // Terminate loop
+        return; 
       }
       
       if (!this.analyser || !this.dataArray) return;
@@ -706,7 +474,7 @@ export class WhatHappenedComponent implements OnDestroy {
       this.audioLevels.set(newLevels);
     };
     
-    draw(); // Start loop
+    draw(); 
   }
 
   private stopVisualizer() {
@@ -744,7 +512,7 @@ export class WhatHappenedComponent implements OnDestroy {
   protected async goNext() {
     if (!this.canProceed()) return;
 
-    this.isLoading.set(true);
+    this.uiState.showProcessing('Processing your data, this might take some time...');
 
     try {
       let aiResponse: any;
@@ -763,20 +531,18 @@ export class WhatHappenedComponent implements OnDestroy {
         aiResponse = await this.aiService.processComplaint('voice', base64);
       }
       
-      // Store AI results in state
       if (aiResponse) {
         this.stateService.updateDraft({
           aiAnalysis: aiResponse
-        } as any); // cast as any to bypass types for now until we update ComplaintDraft interface
+        } as any); 
         
-        // Navigate to dynamic questions
         this.router.navigate(['/questions']);
       }
     } catch (err) {
       console.error('AI Processing Failed', err);
-      alert('Error processing complaint. Please check API keys or try again.');
+      alert('Error processing complaint. Please check connection and try again.');
     } finally {
-      this.isLoading.set(false);
+      this.uiState.hideProcessing();
     }
   }
 

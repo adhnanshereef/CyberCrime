@@ -3,6 +3,7 @@ import { Injectable, signal } from '@angular/core';
 import { AIAnalysisResponse } from './ai.service';
 
 export interface ComplaintDraft {
+  id?: string;
   mobileNumber: string;
   type?: 'women' | 'fraud';
   whatHappenedText?: string;
@@ -18,6 +19,9 @@ export interface ComplaintDraft {
     idNameMatch?: boolean;
   };
   isAnonymous?: boolean;
+  submittedAt?: string;
+  incidentDate?: string;
+  screenshotBase64?: string;
 }
 
 @Injectable({
@@ -99,6 +103,42 @@ export class ComplaintStateService {
       reader.onloadend = () => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(blob);
+    });
+  }
+
+  getSubmittedCases(): ComplaintDraft[] {
+    const stored = localStorage.getItem('ncrc_submitted');
+    if (!stored) return [];
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  saveAsSubmitted(): void {
+    const draft = this.currentDraft();
+    if (!draft) return;
+    
+    draft.id = Math.random().toString(36).substring(2, 10);
+    draft.submittedAt = new Date().toISOString();
+    
+    const submitted = this.getSubmittedCases();
+    submitted.push(draft);
+    localStorage.setItem('ncrc_submitted', JSON.stringify(submitted));
+    
+    // Clear draft
+    this.updateDraft({
+      type: undefined,
+      whatHappenedText: undefined,
+      whatHappenedAudioBase64: undefined,
+      aiAnalysis: undefined,
+      answers: undefined,
+      rawImages: undefined,
+      basicDetails: undefined,
+      isAnonymous: undefined,
+      incidentDate: undefined,
+      screenshotBase64: undefined
     });
   }
 }

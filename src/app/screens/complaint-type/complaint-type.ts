@@ -7,180 +7,61 @@ import { ComplaintStateService } from '../../core/services/complaint-state.servi
 @Component({
   selector: 'app-complaint-type',
   template: `
-    <div class="screen-container bg-vibrant-purple">
-      <div class="wave-bg"></div>
-      
-      <div class="content-wrapper">
-        <main class="split-options">
-          <button type="button" class="large-option-card" (click)="selectType('women')">
-            <div class="icon-wrapper">
-              <svg aria-hidden="true" viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <div class="min-h-screen bg-background text-on-background flex flex-col font-primary">
+      <main class="flex-grow flex flex-col items-center justify-center max-w-4xl mx-auto w-full px-6 pt-12 pb-32">
+        
+        <header class="text-center mb-10 w-full">
+          <h1 class="text-4xl md:text-5xl font-bold text-primary mb-3">
+            What are you reporting?
+          </h1>
+          <p class="text-xl text-text-secondary font-sans">
+            Choose the category that best describes your situation.
+          </p>
+        </header>
+
+        <div class="flex flex-col sm:flex-row items-stretch gap-6 w-full">
+          <!-- Anonymous / Women / Children -->
+          <button type="button" class="group flex-1 flex flex-col items-center justify-center text-center p-8 bg-surface border-2 border-transparent rounded-3xl transition-all duration-300 hover:border-primary hover:-translate-y-2 hover:shadow-2xl shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary-container" (click)="selectType('women')">
+            <div class="w-24 h-24 mb-6 rounded-full bg-surface-container-highest text-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <h2 class="card-title">{{ languageService.screens().reportAnonymously }}</h2>
-            <p class="card-desc">{{ languageService.screens().reportAnonymouslyDesc }}</p>
+            <h2 class="text-3xl font-bold text-primary mb-2">{{ languageService.screens().reportAnonymously }}</h2>
+            <p class="text-lg text-text-secondary font-sans">{{ languageService.screens().reportAnonymouslyDesc }}</p>
             
             @if (languageService.activeLanguage().code !== 'en') {
-              <div class="english-fallback-group">
-                <span class="fallback-title">Report Anonymously</span>
-                <span class="fallback-desc">Case of Women/Children</span>
+              <div class="w-full mt-6 pt-6 border-t border-border flex flex-col gap-1">
+                <span class="text-base text-text-primary font-bold">Report Anonymously</span>
+                <span class="text-sm text-text-secondary font-sans">Case of Women/Children</span>
               </div>
             }
           </button>
 
-          <button type="button" class="large-option-card" (click)="selectType('fraud')">
-            <div class="icon-wrapper">
-              <svg aria-hidden="true" viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <!-- Financial Fraud -->
+          <button type="button" class="group flex-1 flex flex-col items-center justify-center text-center p-8 bg-surface border-2 border-transparent rounded-3xl transition-all duration-300 hover:border-primary hover:-translate-y-2 hover:shadow-2xl shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary-container" (click)="selectType('fraud')">
+            <div class="w-24 h-24 mb-6 rounded-full bg-surface-container-highest text-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300 relative">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <!-- Minimalist doodle accent -->
+              <svg class="absolute -top-4 -right-4 text-text-secondary opacity-30" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M11 11L15 15M15 11L11 15"></path><circle cx="13" cy="13" r="10"></circle></svg>
             </div>
-            <h2 class="card-title">{{ languageService.screens().reportComplaint }}</h2>
-            <p class="card-desc">{{ languageService.screens().reportComplaintDesc }}</p>
+            <h2 class="text-3xl font-bold text-primary mb-2">{{ languageService.screens().reportComplaint }}</h2>
+            <p class="text-lg text-text-secondary font-sans">{{ languageService.screens().reportComplaintDesc }}</p>
             
             @if (languageService.activeLanguage().code !== 'en') {
-              <div class="english-fallback-group">
-                <span class="fallback-title">Report a Complaint</span>
-                <span class="fallback-desc">Financial Fraud</span>
+              <div class="w-full mt-6 pt-6 border-t border-border flex flex-col gap-1">
+                <span class="text-base text-text-primary font-bold">Report a Complaint</span>
+                <span class="text-sm text-text-secondary font-sans">Financial Fraud</span>
               </div>
             }
           </button>
-        </main>
-      </div>
+        </div>
+      </main>
 
-      <div class="bottom-action-bar">
-        <button class="back-btn standalone" (click)="goBack()" aria-label="Go back">
-          <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <div class="fixed bottom-0 left-0 right-0 p-6 flex items-center justify-center bg-gradient-to-t from-background to-transparent z-10 pointer-events-none">
+        <button class="w-16 h-16 rounded-full bg-surface text-primary border-2 border-border flex items-center justify-center cursor-pointer shadow-lg hover:bg-surface-container-low hover:-translate-y-1 transition-all pointer-events-auto outline-none focus-visible:ring-4 focus-visible:ring-primary" (click)="goBack()" aria-label="Go back">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
       </div>
     </div>
-  `,
-  styles: `
-    .bg-vibrant-purple {
-      background-color: #311b92; /* vibrant deep purple */
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      color: white;
-    }
-    .wave-bg {
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 50%;
-      background-color: #4527a0; /* lighter purple top */
-      border-bottom-left-radius: 50% 20%;
-      border-bottom-right-radius: 50% 20%;
-      z-index: 0;
-    }
-    .content-wrapper {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      padding: calc(88px + 2rem) 1rem 7rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .split-options {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      width: 100%;
-      max-width: 640px;
-    }
-    @media (min-width: 600px) {
-      .split-options {
-        flex-direction: row;
-        align-items: stretch;
-      }
-    }
-    .large-option-card {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 2.5rem 1.5rem;
-      background: #512da8; /* slightly lighter than wave */
-      border: 4px solid transparent;
-      border-radius: 20px;
-      text-decoration: none;
-      color: white;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    }
-    .large-option-card:hover {
-      background: #5e35b1;
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-      border-color: #ffd54f;
-    }
-    .icon-wrapper {
-      margin-bottom: 1.5rem;
-      color: #311b92;
-      background: white;
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .card-title {
-      font-size: 1.75rem;
-      margin-bottom: 0.5rem;
-      font-family: inherit;
-    }
-    .card-desc {
-      font-size: 1.1rem;
-      color: rgba(255,255,255,0.85);
-    }
-    .english-fallback-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.2);
-      width: 100%;
-    }
-    .fallback-title {
-      font-size: 1rem;
-      color: rgba(255,255,255,0.9);
-    }
-    .fallback-desc {
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.7);
-    }
-
-    .bottom-action-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 1.5rem;
-      display: flex;
-      align-items: center;
-      background: linear-gradient(to top, rgba(49, 27, 146, 0.95), transparent);
-      z-index: 10;
-    }
-    .back-btn.standalone {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: white;
-      color: #311b92;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: background 0.2s, transform 0.2s;
-    }
-    .back-btn.standalone:hover {
-      background: #f1f1f1;
-      transform: scale(1.05);
-    }
   `
 })
 export class ComplaintTypeComponent {

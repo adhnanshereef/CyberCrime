@@ -3,6 +3,8 @@ import { NgOptimizedImage } from '@angular/common';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { LanguageService } from './core/services/language.service';
+import { UiStateService } from './core/services/ui-state.service';
+import { ComplaintStateService } from './core/services/complaint-state.service';
 
 @Component({
   imports: [NgOptimizedImage, RouterOutlet, RouterLink],
@@ -13,6 +15,8 @@ import { LanguageService } from './core/services/language.service';
 })
 export class App {
   protected readonly languageService = inject(LanguageService);
+  protected readonly uiState = inject(UiStateService);
+  protected readonly stateService = inject(ComplaintStateService);
   private readonly router = inject(Router);
   
   protected readonly isFlowRoute = signal(false);
@@ -60,6 +64,16 @@ export class App {
     this.languageService.setLanguage(code);
     this.isLanguageMenuOpen.set(false);
     this.languageSearch.set('');
+  }
+
+  protected selectType(type: 'women' | 'fraud'): void {
+    this.closeMenus();
+    if (type === 'fraud') {
+      this.router.navigate(['/urgency']);
+    } else if (type === 'women') {
+      this.stateService.updateDraft({ isAnonymous: true, mobileNumber: 'Anonymous' } as any);
+      this.router.navigate(['/what-happened']);
+    }
   }
 
   protected closeMenus(): void {

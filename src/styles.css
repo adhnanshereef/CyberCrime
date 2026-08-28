@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
 	--font-primary: 'DM Serif Display', Georgia, serif;
 	--color-bg: #fdfcf9;

@@ -19,6 +19,8 @@ export interface AIAnalysisResponse {
     condition?: any;
   }>;
   original_transcript?: string;
+  translation_to_english?: string;
+  category?: string;
 }
 
 export interface ScreenshotAnalysisResponse {
