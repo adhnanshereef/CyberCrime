@@ -28,6 +28,16 @@ import { UiStateService } from '../../core/services/ui-state.service';
             </div>
           }
         </header>
+
+        @if (aiError()) {
+          <div class="w-full bg-urgent/10 border-l-4 border-urgent p-4 rounded-r-xl mb-6 shadow-sm flex items-start gap-4">
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" class="text-urgent shrink-0 mt-0.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div class="flex-1">
+              <h3 class="font-bold text-urgent text-lg mb-1 font-sans">We need a bit more detail</h3>
+              <p class="text-text-primary font-sans">{{ aiError() }}</p>
+            </div>
+          </div>
+        }
         
         <div class="w-full bg-surface border-2 border-border rounded-3xl p-6 md:p-8 shadow-sm flex flex-col gap-8">
           
@@ -195,6 +205,7 @@ export class WhatHappenedComponent implements OnDestroy {
   private readonly aiService = inject(AiService);
 
   protected readonly inputType = signal<'text' | 'voice' | null>(null);
+  protected readonly aiError = signal<string | null>(null);
   
   // Text state
   protected readonly textContent = signal('');
@@ -512,6 +523,7 @@ export class WhatHappenedComponent implements OnDestroy {
   protected async goNext() {
     if (!this.canProceed()) return;
 
+    this.aiError.set(null); // Clear previous errors
     this.uiState.showProcessing('Processing your data, this might take some time...');
 
     try {
@@ -532,15 +544,25 @@ export class WhatHappenedComponent implements OnDestroy {
       }
       
       if (aiResponse) {
+        if (aiResponse.error) {
+          // If the AI explicitly flagged the input as junk/empty
+          this.aiError.set(aiResponse.error);
+          // Scroll to top so the user sees the error
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
         this.stateService.updateDraft({
           aiAnalysis: aiResponse
         } as any); 
         
         this.router.navigate(['/questions']);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('AI Processing Failed', err);
-      alert('Error processing complaint. Please check connection and try again.');
+      // Display the actual error message dynamically on the screen
+      this.aiError.set(err.message || 'An unknown error occurred while processing your complaint.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       this.uiState.hideProcessing();
     }

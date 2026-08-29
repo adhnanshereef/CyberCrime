@@ -120,12 +120,8 @@ export class LoginComponent {
     await new Promise(r => setTimeout(r, 800));
     this.isLoading.set(false);
     
-    // Save phone number to state
-    const currentDraft = this.stateService.currentDraft() || {};
-    this.stateService.updateDraft({ 
-      ...currentDraft,
-      mobileNumber: this.mobileNumber 
-    } as any);
+    // Login the user to properly set current user state and initialize draft
+    this.stateService.login(this.mobileNumber);
 
     if (this.isTrackingMode) {
       this.router.navigate(['/track']);

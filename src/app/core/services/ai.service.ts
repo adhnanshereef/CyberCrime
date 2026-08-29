@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 export interface AIAnalysisResponse {
+  error?: string;
   extracted_details: {
     category: string | null;
     incident_date: string | null;

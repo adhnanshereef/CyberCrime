@@ -57,12 +57,13 @@ export class ComplaintStateService {
   }
 
   updateDraft(updates: Partial<ComplaintDraft>) {
-    const draft = this.currentDraft();
-    if (draft) {
-      const updated = { ...draft, ...updates };
-      this.saveDraft(updated);
-      this.currentDraft.set(updated);
+    let draft = this.currentDraft();
+    if (!draft) {
+      draft = { mobileNumber: updates.mobileNumber || 'Anonymous' } as ComplaintDraft;
     }
+    const updated = { ...draft, ...updates };
+    this.saveDraft(updated);
+    this.currentDraft.set(updated);
   }
 
   private getStoredMobile(): string | null {

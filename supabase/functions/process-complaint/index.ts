@@ -68,7 +68,14 @@ serve(async (req) => {
       if (!sarvamRes.ok) throw new Error(`Sarvam Error: ${JSON.stringify(sarvamData)}`);
       
       englishText = sarvamData.transcript || sarvamData.text; // Depends on exact response shape
-      if (!englishText) throw new Error('No transcript returned from Sarvam AI');
+      if (!englishText || englishText.trim() === '') {
+        return new Response(JSON.stringify({ 
+          success: true, 
+          data: { error: "We couldn't detect any speech. Please try recording again or type your complaint." } 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Now send to Gemini
@@ -82,6 +89,7 @@ Keep questions simple and jargon-free.
 
 Required Output Schema:
 {
+  "error": "string or null", // Set this to a user-facing error message ONLY IF the statement is complete junk, empty, or completely unrelated to any complaint (e.g. "hello", "test").
   "extracted_details": {
     "category": "Financial Fraud | Women/Children | Other",
     "incident_date": "string or null",
@@ -96,21 +104,17 @@ Required Output Schema:
       "type": "select",
       "options": ["GPay", "Bank App", "Other"],
       "condition": null
-    },
-    {
-      "id": "q2_gpay",
-      "question": "Please upload a screenshot of the GPay transaction, or type the UTR number if you know it.",
-      "type": "file_or_text",
-      "condition": { "dependsOn": "q1", "value": "GPay" }
     }
   ]
 }
 
 Rules:
-1. Limit follow-up questions to a maximum of 7.
-2. If financial fraud is detected but no transaction ID/UTR is provided, ask for a 'file_or_text' (screenshot or text input). Make sure to specify the file should be an image.
-3. Use the 'condition' field to create branching logic based on previous answers.
-4. Output STRICTLY JSON matching the schema.
+1. If the user statement is completely unrelated to a complaint (e.g., "hello", "hi", "test", empty string, or random gibberish), DO NOT extract details. Instead, set the "error" field to a polite message asking them to describe their cybercrime complaint.
+2. If the user provides AT LEAST SOME context indicating a cybercrime or distress (e.g., "I lost money", "someone is blackmailing me", "my account was hacked"), DO NOT set the "error" field. Accept it, extract what you can, and use follow-up questions to get the rest.
+3. Limit follow-up questions to a maximum of 10.
+4. If financial fraud is detected but no transaction ID/UTR is provided, ask for a 'file_or_text' (screenshot or text input). Make sure to specify the file should be an image.
+5. Use the 'condition' field to create branching logic based on previous answers.
+6. Output STRICTLY JSON matching the schema.
 
 User Statement: "${englishText}"`;
 

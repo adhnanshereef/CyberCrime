@@ -74,7 +74,8 @@ export class ComplaintTypeComponent {
     if (type === 'fraud') {
       this.router.navigate(['/urgency']);
     } else if (type === 'women') {
-      this.stateService.updateDraft({ isAnonymous: true, mobileNumber: 'Anonymous' } as any);
+      this.stateService.login('Anonymous');
+      this.stateService.updateDraft({ isAnonymous: true } as any);
       this.router.navigate(['/what-happened']);
     }
   }
