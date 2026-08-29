@@ -77,7 +77,6 @@ import { UiStateService } from '../../core/services/ui-state.service';
               #fileInput 
               type="file" 
               accept="image/*" 
-              capture="environment"
               class="hidden" 
               (change)="handleImageUpload($event)" />
 
