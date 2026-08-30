@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
   <img src="public/favicon.png" alt="NCRP Logo" width="120" />
   
   # National Cyber Crime Reporting Portal 🛡️
@@ -11,6 +11,7 @@
     <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
     <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
     <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+    <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
   </p>
 </div>
 
@@ -36,21 +37,66 @@ This portal provides citizens an accessible, multilingual way to report cybercri
 | **Styling** | [Tailwind CSS v3](https://tailwindcss.com) with a custom earthy design palette |
 | **Language** | TypeScript (Strict mode) |
 | **Backend (BaaS)** | [Supabase](https://supabase.com) (Edge Functions, Environment Secrets) |
-| **AI - Transcription** | [Sarvam AI](https://sarvam.ai) (\saaras:v3\ Speech-to-Text-Translate for Indian languages) |
+| **AI - Transcription** | [Sarvam AI](https://sarvam.ai) (`saaras:v3` Speech-to-Text-Translate for Indian languages) |
+| **AI - Translation** | [DeepL API](https://www.deepl.com) (Translates text complaints to English) |
 | **AI - Analysis** | [Google Gemini](https://ai.google.dev) (Multi-model fallback: 3.7/3.6/3.5-flash) |
 | **AI - ID Verification** | [Google Gemini Vision](https://ai.google.dev) (OCR on Government ID Images) |
 | **Hosting** | [Vercel](https://vercel.com) (Frontend) + [Supabase](https://supabase.com) (Edge Functions) |
-| **State Persistence**| Browser \localStorage\ (Draft complaints, session, submitted cases) |
+| **State Persistence**| Browser `localStorage` (Draft complaints, session, submitted cases) |
 
 ---
 
 ## 🏗️ Architecture
 
+### 🔄 System Workflow & AI Integration
+
+```mermaid
+graph TD
+    subgraph Client [📱 Angular PWA]
+        UI[User Interface]
+        State[State Management / localStorage]
+    end
+
+    subgraph Backend [☁️ Supabase Edge Functions]
+        PF[process-complaint]
+        PS[process-screenshot]
+        VI[verify-id]
+    end
+
+    subgraph AIProviders [🤖 AI Providers]
+        Sarvam[Sarvam AI<br>Speech-to-Text & Translate]
+        DeepL[DeepL API<br>Text Translation]
+        Gemini[Google Gemini<br>Text & Vision Analysis]
+    end
+
+    %% Complaint Flow
+    UI -- "1a. Records Audio" --> PF
+    UI -- "1b. Types Text" --> PF
+    
+    PF -- "2a. Sends Audio" --> Sarvam
+    PF -- "2b. Sends Text" --> DeepL
+    
+    Sarvam -- "3a. English Transcript" --> PF
+    DeepL -- "3b. English Text" --> PF
+    
+    PF -- "4. Sends English Text" --> Gemini
+    Gemini -- "5. Extracts Details & Questions" --> PF
+    PF -- "6. Structured JSON" --> State
+    State -- "7. Displays Follow-up Questions" --> UI
+    
+    %% Document Flows
+    UI -- "Uploads ID" --> VI
+    VI -- "OCR Request" --> Gemini
+    
+    UI -- "Uploads Screenshot" --> PS
+    PS -- "Vision Analysis" --> Gemini
+```
+
 ### Frontend - Angular SPA
 
 The app is a single-page application with fully **lazy-loaded routes**, meaning each screen is only downloaded when the user navigates to it, ensuring lightning-fast performance.
 
-\\\	ext
+```text
 src/app/
 ├── app.ts                  # Root component (Navbar, Route Outlet, Global Menus)
 ├── app.routes.ts           # Lazy-loaded route definitions
@@ -85,7 +131,7 @@ src/app/
 └── shared/
     └── components/
         └── audio-player/   # Reusable Web Audio API waveform visualizer
-\\\
+```
 
 ### 🛣️ User Flows
 
@@ -104,7 +150,7 @@ src/app/
 
 Three serverless functions handle all AI communication. They run on Deno and keep API keys securely server-side.
 
-\\\	ext
+```text
 supabase/functions/
 ├── process-complaint/     # Main AI pipeline for voice/text complaint analysis
 │   └── index.ts           # 1. Sarvam AI (STT + translate) ➔ 2. Gemini (Extract + Questions)
@@ -112,34 +158,33 @@ supabase/functions/
 │   └── index.ts           # Gemini Vision ➔ UTR, Amount, Date, Bank Name
 └── verify-id/             # Verifies government ID image
     └── index.ts           # Gemini Vision ➔ ID Type, Name Match
-\\\
+```
 
 ### 🧠 State Management
 
-All state is managed through modern Angular **Signals** with reliable \localStorage\ persistence. The \ComplaintStateService\ acts as the single source of truth:
+All state is managed through modern Angular **Signals** with reliable `localStorage` persistence. The `ComplaintStateService` acts as the single source of truth:
 
-- \currentDraft\ - Holds the entire in-progress complaint (text, audio base64, AI analysis, answers, images).
-- \currentUserMobile\ - The logged-in mobile number (or \'Anonymous'\).
-- \updateDraft()\ - Merges partial updates and persists to \localStorage\ immediately, smartly initializing a draft if one doesn't exist.
-- \login()\ - Sets the current user and seeds/loads their draft from \localStorage\.
-- \saveAsSubmitted()\ - Moves the completed draft into a separate \
-crc_submitted\ list.
+- `currentDraft` - Holds the entire in-progress complaint (text, audio base64, AI analysis, answers, images).
+- `currentUserMobile` - The logged-in mobile number (or `'Anonymous'`).
+- `updateDraft()` - Merges partial updates and persists to `localStorage` immediately, smartly initializing a draft if one doesn't exist.
+- `login()` - Sets the current user and seeds/loads their draft from `localStorage`.
+- `saveAsSubmitted()` - Moves the completed draft into a separate `ncrc_submitted` list.
 
 ---
 
 ## 🎨 Design System
 
-The UI follows a custom earthy, premium design palette with warm neutral tones. All tokens are defined as CSS custom properties in \src/app/app.css\ and consumed via Tailwind utility classes.
+The UI follows a custom earthy, premium design palette with warm neutral tones. All tokens are defined as CSS custom properties in `src/app/app.css` and consumed via Tailwind utility classes.
 
 | Token | Purpose | Preview |
 |---|---|---|
-| \--color-primary\ | Brand accent (warm brown) | 🟤 |
-| \--color-background\| App background (off-white/cream) | ⚪ |
-| \--color-surface\ | Card surfaces | ⬜ |
-| \--color-border\ | Subtle dividers | 🔘 |
-| \--color-urgent\ | Danger/alerts (muted red) | 🔴 |
-| \--font-primary\ | DM Serif Display | *Headings* |
-| \--font-sans\ | System sans-serif | Body Text |
+| `--color-primary` | Brand accent (warm brown) | 🟤 |
+| `--color-background`| App background (off-white/cream) | ⚪ |
+| `--color-surface` | Card surfaces | ⬜ |
+| `--color-border` | Subtle dividers | 🔘 |
+| `--color-urgent` | Danger/alerts (muted red) | 🔴 |
+| `--font-primary` | DM Serif Display | *Headings* |
+| `--font-sans` | System sans-serif | Body Text |
 
 ---
 
@@ -148,55 +193,55 @@ The UI follows a custom earthy, premium design palette with warm neutral tones. 
 ### 1. Environment Setup
 
 **Clone the repository**
-\\\ash
+```bash
 git clone <repo-url>
 cd CyberCrime
-\\\
+```
 
 **Install dependencies**
-\\\ash
+```bash
 npm install
-\\\
+```
 
 **Configure environment variables**
-Edit \src/environments/environment.ts\:
-\\\	ypescript
+Edit `src/environments/environment.ts`:
+```typescript
 export const environment = {
   production: false,
   supabaseUrl: 'https://YOUR_PROJECT.supabase.co',
   supabaseKey: 'YOUR_ANON_PUBLIC_KEY'
 };
-\\\
+```
 
 **Configure Supabase Edge Function secrets**
 *(You must have the Supabase CLI installed)*
-\\\ash
+```bash
 supabase secrets set GEMINI_API_KEY=your_key
 supabase secrets set SARVAM_API_KEY=your_key
-\\\
+```
 
 ### 2. Development
 
-\\\ash
+```bash
 # Start local dev server (hot reload)
 npm start
 # or
 ng serve
-\\\
+```
 Open [http://localhost:4200](http://localhost:4200) in your browser.
 
 ### 3. Build for Production
 
-\\\ash
+```bash
 # Production build (optimised, output in dist/CyberCrime/)
 npm run build
 # or
 ng build
-\\\
+```
 
 ### 4. Supabase Edge Functions
 
-\\\ash
+```bash
 # Deploy all edge functions to your Supabase project
 supabase functions deploy process-complaint
 supabase functions deploy process-screenshot
@@ -204,7 +249,7 @@ supabase functions deploy verify-id
 
 # Serve edge functions locally for testing
 supabase functions serve
-\\\
+```
 
 ---
 
