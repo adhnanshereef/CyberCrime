@@ -159,11 +159,8 @@ import { RouterLink } from '@angular/router';
           </div>
           
           <div class="flex flex-col items-center md:items-end text-center md:text-right gap-1 pt-6 md:pt-0 border-t border-border/50 md:border-0 w-full md:w-auto">
-            <span class="text-text-secondary font-sans text-sm">
+            <span class="text-text-secondary font-sans text-sm text-center">
               Created by <a href="https://adhnan.me" target="_blank" rel="noopener noreferrer" class="font-bold text-primary hover:underline">Adhnan Shereef T</a>
-            </span>
-            <span class="text-text-secondary font-sans text-sm">
-              for <a href="https://buildwhatmovesindia.com/" target="_blank" rel="noopener noreferrer" class="font-bold text-accent hover:underline flex items-center gap-1">Build What Moves India <svg aria-hidden="true" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
             </span>
             <span class="text-text-secondary/60 font-sans text-xs mt-2">
               &copy; {{ currentYear }} All Rights Reserved.

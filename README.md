@@ -1,17 +1,16 @@
 <div align="center">
   <img src="public/favicon.png" alt="NCRP Logo" width="120" />
   
-  # National Cyber Crime Reporting Portal 🛡️
+  # National Cyber Crime Reporting Portal 
   
-  **A demo-grade, AI-powered Progressive Web App for filing and tracking cybercrime complaints in India.**  
-  *Built for [Build What Moves India](https://buildwhatmovesindia.com).*
+  **A demo-grade, AI-powered Progressive Web App for filing and tracking cybercrime complaints in India.**
 
   <p align="center">
-    <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
-    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
-    <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
+    <img src="https://img.shields.io/badge/Angular-black?style=flat&logo=angular" alt="Angular" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-black?style=flat&logo=tailwind-css" alt="Tailwind" />
+    <img src="https://img.shields.io/badge/TypeScript-black?style=flat&logo=typescript" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Supabase-black?style=flat&logo=supabase" alt="Supabase" />
+    <img src="https://img.shields.io/badge/Google_Gemini-black?style=flat&logo=google" alt="Gemini" />
   </p>
 </div>
 
@@ -255,6 +254,6 @@ supabase functions serve
 
 ## 👨‍💻 Credits
 
-Created by **Adhnan Shereef T** ([adhnan.me](https://adhnan.me)) for **Build What Moves India** ([buildwhatmovesindia.com](https://buildwhatmovesindia.com))
+Created by **Adhnan Shereef T** ([adhnan.me](https://adhnan.me))
 
 > ⚠️ **Disclaimer:** This is a **demo application**. It does not connect to any real government database or file actual police complaints. All data is stored locally in your browser.
