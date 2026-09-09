@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/favicon.png" alt="NCRP Logo" width="120" />
+  <img src="public/apple-touch-icon.png" alt="NCRP Logo" width="120" />
   
   # National Cyber Crime Reporting Portal 
   
